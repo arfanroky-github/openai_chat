@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { FormEvent,  SetStateAction,  useEffect,  useState } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const userMessage: any =[]
+  const [choices, setChoices] = useState();
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+
+
+  async function handleSearch(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const params = encodeURI(query)
+    userMessage.push(query)
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:8000/api/chat/?search=${params}`);
+      const results = await response.json();
+     setChoices(results?.success?.content)
+     setLoading(false)
+    } catch (error) {
+      setLoading(false)
+      console.log(error)
+    }
+    
+
+  }
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+    <section className="app">
+      <article className="container">
+        <div>
+          <p>user: {query}</p>
+          <p>gpt: { loading ? 'Loading...':  choices}</p>
+        </div>
+
+        <form onSubmit={handleSearch}>
+          <input
+            className="input_field"
+            type="search"
+            value={query}
+            onChange={({ target }) => setQuery(target.value)}
+          />
+        </form>
+      </article>
+    </section>
+  );
 }
 
-export default App
+export default App;
